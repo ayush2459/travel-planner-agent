@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: travel-planner-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GOOGLE_GENAI_USE_VERTEXAI
+        value: "FALSE"
+      - key: GOOGLE_API_KEY
+        sync: false

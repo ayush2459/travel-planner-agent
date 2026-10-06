@@ -1,0 +1,4 @@
+streamlit>=1.65
+python-dotenv>=1.0
+litellm>=1.84
+reportlab>=4.0
