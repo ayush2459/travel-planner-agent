@@ -88,3 +88,7 @@ See `example_conversations.md` for sample conversations.
 - Add a `google_search` tool or a Maps/Places API for live data.
 - Add a weather tool and adjust the itinerary for rain or heat.
 - Add session state to remember preferences across turns.
+
+## Smart Conversation Memory
+
+The current version is conversation-aware. Follow-up requests such as `make it cheaper`, `change day 2`, `I am vegetarian`, or `what is the total now?` use the relevant previous messages from the current Streamlit session. See `SMART_MEMORY.md` for details and testing.

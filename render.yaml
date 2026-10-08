@@ -1,4 +1,4 @@
-﻿services:
+services:
   - type: web
     name: travel-planner-agent
     runtime: python

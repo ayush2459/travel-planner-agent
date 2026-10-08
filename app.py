@@ -151,7 +151,7 @@ st.markdown("""
 with st.sidebar:
     st.markdown('<div class="brand">TRAVEL<span>AI</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="side-caption">Your intelligent trip companion for routes, budgets, stays and day-by-day plans.</div>', unsafe_allow_html=True)
-    st.markdown('<div class="status">✓ OLLAMA LOCAL</div>', unsafe_allow_html=True)
+    st.markdown('<div class="status">✓ CONVERSATION MEMORY</div>', unsafe_allow_html=True)
     st.markdown('<div class="status" style="margin-left:4px">✓ PDF REPORTS</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="model-card">', unsafe_allow_html=True)
@@ -175,7 +175,7 @@ with st.sidebar:
         st.session_state.queued = None
         st.rerun()
     st.markdown(
-        '<div class="small-muted">✓ LIVE FACT-CHECK GUARD — searches current web results before planning and asks the model to prefer official sources for time-sensitive claims.</div>',
+        '<div class="small-muted">✓ CONVERSATION MEMORY — remembers the current trip across follow-up messages.<br>✓ LIVE FACT-CHECK GUARD — searches current web results before planning and asks the model to prefer official sources for time-sensitive claims.</div>',
         unsafe_allow_html=True,
     )
 
@@ -205,7 +205,11 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("Planning your trip with Ollama..."):
             try:
-                answer, meta = ask_agent(prompt, st.session_state.session_id)
+                answer, meta = ask_agent(
+                    prompt,
+                    st.session_state.session_id,
+                    history=st.session_state.messages,
+                )
                 if not answer:
                     answer = "Sorry, I did not get a response. Please try again."
                     meta = {}
