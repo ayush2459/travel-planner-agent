@@ -16,3 +16,8 @@ __pycache__/
 Thumbs.db
 .vscode/
 .adk/
+
+# Local trip database
+travel_planner.db
+travel_planner.db-shm
+travel_planner.db-wal
