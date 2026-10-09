@@ -92,3 +92,9 @@ See `example_conversations.md` for sample conversations.
 ## Smart Conversation Memory
 
 The current version is conversation-aware. Follow-up requests such as `make it cheaper`, `change day 2`, `I am vegetarian`, or `what is the total now?` use the relevant previous messages from the current Streamlit session. See `SMART_MEMORY.md` for details and testing.
+
+## Smart Travel Suite v2 additions
+
+See [`SMART_UPGRADE_GUIDE.md`](SMART_UPGRADE_GUIDE.md) for local setup, tests, deployment notes, and limitations. This build adds saved trips with revision snapshots, day-by-day itinerary tabs, a deterministic budget calculator, current weather lookup, currency conversion, and optional PostgreSQL persistence while retaining Ollama/Groq, fact-check search, and PDF reports.
+
+**Privacy note:** saved trips are scoped to a random workspace token in the URL. Treat that URL as private. This is not a multi-user authenticated service; do not use it for sensitive personal data or expose it to multiple users until authentication and per-user authorization are implemented.

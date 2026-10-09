@@ -1,0 +1,151 @@
+{
+  "assignment": "Assignment 2 - Travel Planner Agent Evaluation",
+  "metrics": [
+    "correctness",
+    "relevance",
+    "completeness",
+    "tool_usage"
+  ],
+  "scoring": "Each metric 0-1; test score is the mean.",
+  "test_cases": [
+    {
+      "id": "TC01",
+      "category": "valid_trip",
+      "input": "Plan a 3-day trip to Jaipur with a budget of ₹15,000. I like history and local food.",
+      "expected_behavior": [
+        "3-day itinerary",
+        "Jaipur destinations",
+        "historical places prioritized",
+        "local food",
+        "₹15,000 budget considered"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC02",
+      "category": "valid_trip",
+      "input": "Plan a 5-day trip to Delhi for two people with a moderate budget. Include major attractions and local experiences.",
+      "expected_behavior": [
+        "5-day Delhi itinerary",
+        "major attractions",
+        "local experiences",
+        "practical two-person plan",
+        "budget estimate"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC03",
+      "category": "low_budget",
+      "input": "Plan a 3-day trip to Rishikesh under ₹5,000 per person.",
+      "expected_behavior": [
+        "3-day plan",
+        "low-cost assumptions",
+        "stay within budget where practical",
+        "label estimates"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC04",
+      "category": "missing_destination",
+      "input": "Plan me a 4-day trip with a budget of ₹20,000.",
+      "expected_behavior": [
+        "ask for destination",
+        "do not invent destination"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC05",
+      "category": "missing_budget",
+      "input": "Plan a 4-day trip to Goa for two people. We like beaches and nightlife.",
+      "expected_behavior": [
+        "use assumptions or ask budget",
+        "prioritize beaches and nightlife",
+        "do not invent exact budget"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC06",
+      "category": "invalid_days",
+      "input": "Plan a 0-day trip to Jaipur.",
+      "expected_behavior": [
+        "recognize invalid duration",
+        "ask for positive duration",
+        "do not generate normal itinerary"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC07",
+      "category": "negative_budget",
+      "input": "Plan a 5-day trip to Manali with a budget of -₹10,000.",
+      "expected_behavior": [
+        "recognize invalid budget",
+        "ask for valid budget",
+        "do not use negative amount"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC08",
+      "category": "preference_history",
+      "input": "Plan a 2-day trip to Agra. I am mainly interested in historical places and architecture.",
+      "expected_behavior": [
+        "2-day Agra itinerary",
+        "prioritize Taj Mahal/Agra Fort and history",
+        "architecture focus"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC09",
+      "category": "preference_food",
+      "input": "Plan a 3-day trip to Amritsar. I am a vegetarian and want to explore famous local food.",
+      "expected_behavior": [
+        "3-day Amritsar itinerary",
+        "vegetarian food",
+        "local food experiences",
+        "relevant attractions"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC10",
+      "category": "out_of_scope",
+      "input": "Explain how binary search works in Java and provide code.",
+      "expected_behavior": [
+        "recognize outside scope",
+        "politely explain supported travel scope",
+        "do not pretend it is travel"
+      ],
+      "tool_required": false
+    },
+    {
+      "id": "TC11",
+      "category": "time_sensitive",
+      "input": "What are the current visa requirements for an Indian citizen travelling to Japan in 2026?",
+      "expected_behavior": [
+        "use live search",
+        "prefer official sources",
+        "state current information",
+        "recommend verification"
+      ],
+      "tool_required": true
+    },
+    {
+      "id": "TC12",
+      "category": "time_sensitive",
+      "input": "Is the Eiffel Tower open tomorrow and what are the current ticket prices?",
+      "expected_behavior": [
+        "use live search",
+        "prefer official attraction source",
+        "state time-sensitive nature",
+        "provide verification"
+      ],
+      "tool_required": true
+    }
+  ]
+}

@@ -152,6 +152,10 @@ def inr(value) -> str:
         s = head + "," + tail
     return ("-" if n < 0 else "") + "\u20b9" + s
 
+def money(value, currency="INR") -> str:
+    symbols = {"INR": "₹", "USD": "$", "EUR": "€", "GBP": "£", "JPY": "¥", "AUD": "A$", "CAD": "C$", "SGD": "S$", "AED": "AED ", "THB": "฿"}
+    return f"{symbols.get(str(currency).upper(), str(currency).upper() + ' ')}{float(value):,.2f}"
+
 
 def inline(text: str) -> str:
     """Convert a small markdown subset to ReportLab paragraph markup."""
@@ -408,7 +412,7 @@ class BudgetVisual(Flowable):
             c.rect(cx, y, sw, h, stroke=0, fill=1)
             cx += sw + gap
 
-    def _legend(self, c, top, items, total, show_values=True):
+    def _legend(self, c, top, items, total, show_values=True, currency="INR"):
         col_w = self.width / 3
         for idx, (label, val) in enumerate(items):
             row, col = divmod(idx, 3)
@@ -424,12 +428,13 @@ class BudgetVisual(Flowable):
                 c.setFont("Poppins", 7.6)
                 pct = f"  {val / total * 100:.0f}%" if total else ""
                 c.drawString(x + 4 * mm + pdfmetrics.stringWidth(label, "Poppins-Medium", 7.6) + 1.6 * mm,
-                             y - 2.2 * mm, inr(val) + pct)
+                             y - 2.2 * mm, money(val, currency) + pct)
 
     def draw(self):
         c = self.canv
         c.saveState()
         d = self.data
+        currency = d.get("currency", "INR")
         top = self.height
         c.setFillColor(MUTED)
         c.setFont("Poppins-SemiBold", 6.8)
@@ -447,7 +452,7 @@ class BudgetVisual(Flowable):
             total = sum(v for _, v in items)
             bar_y = top - 6.5 * mm - 9 * mm
             self._stack(c, 0, bar_y, self.width, 9 * mm, items, total)
-            self._legend(c, bar_y - 3.6 * mm, items, total)
+            self._legend(c, bar_y - 3.6 * mm, items, total, currency=currency)
             rows = (len(items) + 2) // 3
             if d.get("budget"):
                 budget = d["budget"]
@@ -469,14 +474,14 @@ class BudgetVisual(Flowable):
                     c.roundRect(0, gy, max(self.width * ratio, 4.6 * mm), 4.6 * mm, 2.3 * mm, stroke=0, fill=1)
                 c.setFillColor(INK)
                 c.setFont("Poppins-SemiBold", 8)
-                c.drawString(0, gy - 4.2 * mm, f"Estimated {inr(total)}  ({total / budget * 100:.0f}% of {inr(budget)})")
+                c.drawString(0, gy - 4.2 * mm, f"Estimated {money(total, currency)}  ({total / budget * 100:.0f}% of {money(budget, currency)})")
                 c.setFont("Poppins", 7.6)
                 c.setFillColor(BRICK if over else TEAL_MID)
                 if over:
-                    msg = f"Over budget by {inr(total - budget)}"
+                    msg = f"Over budget by {money(total - budget, currency)}"
                 else:
                     extra = d.get("not_included") or "flights and extras"
-                    msg = f"{inr(budget - total)} left for {extra}"
+                    msg = f"{money(budget - total, currency)} left for {extra}"
                 c.drawRightString(self.width, gy - 4.2 * mm, msg)
         else:
             tiers = d["tiers"]
@@ -496,6 +501,47 @@ class BudgetVisual(Flowable):
                 c.drawRightString(self.width, y + 2.2 * mm, inr(seg_total))
                 y -= 11.5 * mm
             self._legend(c, y + 4.2 * mm, d["items"], 0, show_values=False)
+        c.restoreState()
+
+
+class WeatherVisual(Flowable):
+    """Compact current-weather status panel included in the itinerary PDF."""
+    def __init__(self, data: dict, width: float = CONTENT_W):
+        super().__init__()
+        self.data, self.width = data, width
+        self.height = 30 * mm
+
+    def wrap(self, aw, ah):
+        return self.width, self.height
+
+    def draw(self):
+        c = self.canv
+        d = self.data
+        c.saveState()
+        c.setFillColor(SAND)
+        c.roundRect(0, 0, self.width, self.height, 3 * mm, stroke=0, fill=1)
+        c.setFillColor(TEAL_MID)
+        c.setFont("Poppins-SemiBold", 7)
+        c.drawString(5 * mm, self.height - 6 * mm, "CURRENT WEATHER · LIVE LOOKUP")
+        c.setFillColor(INK)
+        c.setFont("Poppins-SemiBold", 10)
+        temp = d.get("temperature_2m")
+        temp_text = f"{temp}°C" if temp is not None else "Unavailable"
+        c.drawString(5 * mm, self.height - 15 * mm, f"Temperature: {temp_text}")
+        c.setFont("Poppins-SemiBold", 8)
+        c.drawString(53 * mm, self.height - 12 * mm, str(d.get("weather_description") or "Conditions unavailable")[:42])
+        c.setFont("Poppins", 7.5)
+        feels = d.get("apparent_temperature")
+        rain = d.get("precipitation")
+        wind = d.get("wind_speed_10m")
+        humidity = d.get("relative_humidity_2m")
+        details = f"Feels like {feels if feels is not None else '—'}°C   ·   Rain {rain if rain is not None else '—'} mm   ·   Wind {wind if wind is not None else '—'} km/h   ·   Humidity {humidity if humidity is not None else '—'}%"
+        c.setFillColor(MUTED)
+        c.drawString(5 * mm, 6 * mm, details[:120])
+        c.setFont("Poppins", 6.2)
+        stamp = d.get("time") or "retrieval time unavailable"
+        zone = d.get("timezone") or "local time"
+        c.drawRightString(self.width - 5 * mm, 2.5 * mm, f"{stamp} · {zone} · Open-Meteo")
         c.restoreState()
 
 
@@ -666,7 +712,15 @@ def _items_from_breakdown(b: dict) -> list[tuple[str, float]]:
 
 
 def budget_data_from_meta(meta: dict | None):
-    est = (meta or {}).get("estimate") or {}
+    meta = meta or {}
+    calc = meta.get("budget_calculator") or {}
+    if calc.get("categories") and any(float(v or 0) for v in calc["categories"].values()):
+        items = [(str(k), float(v)) for k, v in calc["categories"].items() if float(v or 0) > 0]
+        if items:
+            return {"mode": "single", "title": "Budget calculator · entered estimates", "items": items,
+                    "budget": float(calc.get("limit") or 0), "currency": calc.get("currency", "INR"),
+                    "not_included": "unentered costs and price changes"}
+    est = meta.get("estimate") or {}
     if est.get("breakdown_inr"):
         return {
             "mode": "single",
@@ -1001,6 +1055,9 @@ def build_itinerary_pdf(markdown_text: str, meta: dict | None = None) -> bytes:
     doc.addPageTemplates([PageTemplate(id="first", frames=[first]), PageTemplate(id="later", frames=[later])])
 
     story: list = [NextPageTemplate("later")]
+    weather = (meta or {}).get("weather")
+    if weather:
+        story += [SectionHeader(1, f"Current weather · {weather.get('place', city)}"), WeatherVisual(weather), Spacer(1, 5 * mm)]
     tiles = _derive_tiles(meta, st)
     if tiles is not None:
         story += [tiles, Spacer(1, 7 * mm)]
@@ -1079,6 +1136,8 @@ def build_itinerary_pdf(markdown_text: str, meta: dict | None = None) -> bytes:
             story.append(callout([Paragraph(inline(b[1]), st["callout"])]))
         i += 1
 
+    if budget_visual_data and not budget_visual_added:
+        story += [Spacer(1, 3 * mm), SectionHeader(section_no + 1, "Budget calculator breakdown"), BudgetVisual(budget_visual_data), Spacer(1, 4 * mm)]
     doc.build(story, canvasmaker=_make_canvas_class(ctx))
     return buf.getvalue()
 
